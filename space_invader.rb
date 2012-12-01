@@ -14,7 +14,7 @@ class SpaceInvaders < Chingu::Window
 
 	def update
 		super
-		self.caption = "Health: #{@ship.health}      Score: #{@score.score}      FPS: #{self.fps}"
+		self.caption = "Health: #{@ship.health}      Score: #{@score.score}   #{@score.time}   FPS: #{self.fps}"
 		@ship.each_collision(Mine) do |ship, mine|
 			mine.destroy
 			ship.health_down
@@ -25,10 +25,11 @@ end
 class Score < Chingu::GameObject
 
 	has_traits :timer
-	attr_reader :score
+	attr_reader :score, :time
 
 	def setup
 		@score = 0
+		@time = 0
 
 		file = File.open("difficulty.txt", "r")
 			file.each do |value|
@@ -36,8 +37,10 @@ class Score < Chingu::GameObject
 			end
 		file.close
 
+		every(1000) { @time += 1}
+
 		puts @difficulty
-		every(100) {@score += 1*@difficulty}
+		after(10000) { every(100) {@score += 1*@difficulty} }
 	end
 
 end
@@ -162,7 +165,7 @@ class Difficulty
 	end
 
 	def set_difficulty
-		if @difficulty != "\n"
+		unless @difficulty == ""
 			puts "start writing"
 			file = File.new("difficulty.txt","w")
 			file.write @difficulty.to_i
